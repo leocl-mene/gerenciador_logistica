@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DemandaController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\StatusController;
 use App\Http\Controllers\Api\MotoboyController;
+use App\Http\Controllers\Api\AppController; // NOVO: Controller para o App
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +23,9 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // ADICIONADA: Rota para buscar veículos de um motoboy específico (usando o MotoboyController da API)
 Route::get('/motoboys/{user}/veiculos', [MotoboyController::class, 'getVeiculos']);
+
+// ROTA PARA VERIFICAÇÃO DE VERSÃO DO APP (NOVA ROTA PÚBLICA)
+Route::get('/app/latest-version', [AppController::class, 'latestVersion']);
 
 // Grupo de rotas que exigem autenticação via token (para o app do motoboy)
 Route::middleware('auth:sanctum')->group(function () {
