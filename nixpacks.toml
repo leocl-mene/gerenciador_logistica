@@ -1,0 +1,12 @@
+# nixpacks.toml
+
+[start]
+cmd = "php-fpm"
+
+[processes]
+web = "nginx -c /app/nginx.conf"
+
+[services.web]
+port = "80"
+# A LINHA MAIS IMPORTANTE: Define o diretório público para /public
+rootDir = "/app/public"
