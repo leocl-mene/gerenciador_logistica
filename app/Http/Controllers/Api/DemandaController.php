@@ -133,37 +133,56 @@ class DemandaController extends Controller
         return response()->json($demandas);
     }
     
-    /**
-     * Cria e inicia uma demanda urgente em um único passo.
-     */
+    // ===================================================================
+    // FUNÇÃO 'iniciarUrgente' ATUALIZADA
+    // ===================================================================
     public function iniciarUrgente(Request $request)
     {
-        $request->validate([
-            'veiculo_id' => 'required|exists:veiculos,id',
-            'km_inicial' => 'required|integer|min:0',
+        $validator = \Validator::make($request->all(), [
+            'veiculo_id'     => 'required|exists:veiculos,id',
+            'km_inicial'     => 'required|integer|min:0',
             'foto_km_inicio' => 'required|image|max:5120',
         ]);
 
-        // Cria a nova demanda "Urgente"
-        $demanda = Demanda::create([
-            'titulo' => 'Demanda Urgente - ' . now()->format('d/m/Y H:i'),
-            'tipo' => 'urgente',
-            'status' => 'Em Rota',
-            'secretaria_id' => Auth::id(), 
-            'motoboy_id' => Auth::id(),
-            'veiculo_id' => $request->veiculo_id,
-            'km_inicial' => $request->km_inicial,
-            'data_aceite' => now(), // Assume o aceite imediato
-        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
-        // Salva a foto
-        $path = $request->file('foto_km_inicio')->store('public/km_fotos');
-        DemandasFotosKm::create([
-            'demanda_id' => $demanda->id,
-            'foto_url_inicio' => Storage::url($path),
-        ]);
+        // Se houver forma correta de descobrir a secretaria, use-a aqui:
+        // $secretariaId = optional(Auth::user()->secretaria)->id; // exemplo
+        // Caso contrário, deixe null (desde que a coluna permita):
+        $secretariaId = null;
 
-        return response()->json(['message' => 'Demanda urgente iniciada!', 'demanda' => $demanda]);
+        try {
+            $demanda = \App\Models\Demanda::create([
+                'titulo'        => 'Demanda Urgente - ' . now()->format('d/m/Y H:i'),
+                'tipo'          => 'urgente',
+                'status'        => 'Em Rota',
+                'secretaria_id' => $secretariaId, // remova se a coluna não existir
+                'motoboy_id'    => Auth::id(),
+                'veiculo_id'    => $request->veiculo_id,
+                'km_inicial'    => $request->km_inicial,
+                'data_aceite'   => now(),
+            ]);
+
+            $path = $request->file('foto_km_inicio')->store('public/km_fotos');
+
+            \App\Models\DemandasFotosKm::create([
+                'demanda_id'      => $demanda->id,
+                'foto_url_inicio' => \Storage::url($path),
+            ]);
+
+            return response()->json([
+                'message' => 'Demanda urgente iniciada!',
+                'demanda' => $demanda
+            ], 200);
+        } catch (\Throwable $e) {
+            // Vai te mostrar exatamente o problema no app (FK, fillable, etc.)
+            return response()->json([
+                'message' => 'Falha ao iniciar demanda urgente.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
