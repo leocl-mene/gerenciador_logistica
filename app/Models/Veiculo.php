@@ -25,21 +25,24 @@ class Veiculo extends Model
 
     /**
      * Retorna o consumo padrão (km/l) com base no modelo do veículo.
-     * Este é um "Accessor" do Laravel.
      */
     public function getConsumoPadraoAttribute(): float
     {
-        // O str_contains verifica se a string 'Spin' ou 'Yamaha' existe no nome do modelo
-        if (str_contains(strtolower($this->modelo), 'spin')) {
-            return 10.5; // Média para Spin na cidade com gasolina
-        }
+        $modeloLower = strtolower($this->modelo);
 
-        if (str_contains(strtolower($this->modelo), 'yamaha')) {
+        // PRIMEIRO, verifica se é uma moto.
+        if (str_contains($modeloLower, 'moto') || str_contains($modeloLower, 'yamaha')) {
             return 45.0; // Média para a moto
         }
 
-        // Um valor padrão caso o modelo não seja reconhecido (e para evitar divisão por zero)
-        return 10.0; // Novo padrão mais razoável, se for 1.0 causará custo muito alto
+        // DEPOIS, verifica se é um Spin.
+        if (str_contains($modeloLower, 'spin')) {
+            return 10.5; // Média para Spin na cidade com gasolina
+        }
+
+        // Um valor padrão caso o modelo não seja reconhecido
+        // Isso evita erros de divisão por zero.
+        return 1.0;
     }
 
     /**
