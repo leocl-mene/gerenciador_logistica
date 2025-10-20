@@ -45,12 +45,12 @@ class RelatorioController extends Controller
         $dataInicio = Carbon::parse($request->data_inicio)->startOfDay();
         $dataFim = Carbon::parse($request->data_fim)->endOfDay();
         
-        // CONSULTA ATUALIZADA para usar whereIn, que busca em múltiplos IDs
+        // CONSULTA ATUALIZADA para usar whereIn e carregar a relação 'gpsTracks'
         $demandas = Demanda::whereIn('veiculo_id', $veiculosIds)
             ->where('status', 'Finalizada')
             ->whereBetween('data_finalizacao', [$dataInicio, $dataFim])
-            // Garante que o veículo é carregado para o cálculo de consumo
-            ->with(['percursos', 'motoboy', 'veiculo']) 
+            // CORREÇÃO APLICADA AQUI: Adicionado 'gpsTracks' ao pré-carregamento
+            ->with(['percursos', 'motoboy', 'veiculo', 'gpsTracks']) 
             ->orderBy('data_finalizacao', 'asc')
             ->get();
         

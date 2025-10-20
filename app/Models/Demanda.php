@@ -68,4 +68,9 @@ class Demanda extends Model
     {
         return $this->hasOne(DemandasFotosKm::class);
     }
+
+    public function gpsTracks(): HasMany
+{
+    return $this->hasMany(DemandaGpsTrack::class)->orderBy('recorded_at');
+}
 }

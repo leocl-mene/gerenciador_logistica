@@ -42,6 +42,20 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rota para Listas Demandas do
     Route::get('/minhas-demandas', [DemandaController::class, 'minhasDemandas']);
 
+    // ===================================================================
+    // IMPORTANTE: Rotas específicas (com texto) devem vir ANTES
+    // de rotas genéricas (com parâmetros como {demanda})
+    // para evitar que o roteador se confunda.
+    // ===================================================================
+
+    // Rota para iniciar demanda urgente
+    Route::post('/demandas/urgente/iniciar', [DemandaController::class, 'iniciarUrgente']);
+    
+    // Rota para finalizar demanda urgente
+    Route::post('/demandas/{demanda}/urgente/finalizar', [DemandaController::class, 'finalizarUrgente']);
+    
+    // --- Rotas genéricas com {demanda} ---
+
     // Rota para um motoboy aceitar uma demanda
     Route::post('/demandas/{demanda}/aceitar', [DemandaController::class, 'aceitar']);
 
@@ -50,12 +64,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rota para um motoboy finalizar uma demanda
     Route::post('/demandas/{demanda}/finalizar', [DemandaController::class, 'finalizar']);
-    
-    // Rota para iniciar demanda urgente
-    Route::post('/demandas/urgente/iniciar', [DemandaController::class, 'iniciarUrgente']);
-    
-    // Rota para finalizar demanda urgente
-    Route::post('/demandas/{demanda}/urgente/finalizar', [DemandaController::class, 'finalizarUrgente']);
     
     // Rota para o motoboy enviar rastreamento de uma demanda
     Route::post('/demandas/{demanda}/track', [DemandaController::class, 'storeTrack']);

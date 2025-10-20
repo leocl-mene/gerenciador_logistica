@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Veiculo;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class VeiculoController extends Controller
 {
@@ -32,6 +33,7 @@ class VeiculoController extends Controller
         // 1. Validação dos dados
         $request->validate([
             'placa' => 'required|string|unique:veiculos|max:10',
+            'tipo' => ['required', Rule::in(['moto', 'carro'])],
             'modelo' => 'required|string|max:100',
             'marca' => 'nullable|string|max:100',
             'ano' => 'nullable|integer|digits:4',
@@ -71,6 +73,7 @@ class VeiculoController extends Controller
         // 1. Validação dos dados (semelhante ao store, mas a placa pode ser a mesma do veículo atual)
         $request->validate([
             'placa' => 'required|string|max:10|unique:veiculos,placa,' . $veiculo->id,
+            'tipo' => ['required', Rule::in(['moto', 'carro'])],
             'modelo' => 'required|string|max:100',
             'marca' => 'nullable|string|max:100',
             'ano' => 'nullable|integer|digits:4',

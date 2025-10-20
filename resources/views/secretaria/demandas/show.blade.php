@@ -13,7 +13,14 @@
                 
                 <p><strong>Status:</strong> {{ $demanda->status }}</p>
                 <p><strong>Tipo:</strong> {{ $demanda->tipo ?? 'Normal' }}</p>
-                <p><strong>Criada por:</strong> {{ $demanda->secretaria->name }} em {{ $demanda->created_at->format('d/m/Y H:i') }}</p>
+
+                {{-- Lógica para exibir quem criou a demanda --}}
+                @if ($demanda->secretaria)
+                    <p><strong>Criada por:</strong> {{ $demanda->secretaria->name }} em {{ $demanda->created_at->format('d/m/Y H:i') }}</p>
+                @elseif ($demanda->tipo === 'urgente' && $demanda->motoboy)
+                    <p><strong>Criada por (Urgente):</strong> {{ $demanda->motoboy->name }} em {{ $demanda->created_at->format('d/m/Y H:i') }}</p>
+                @endif
+                
                 @if($demanda->veiculo)
                     <p><strong>Veículo Utilizado:</strong> {{ $demanda->veiculo->modelo }} ({{ $demanda->veiculo->placa }})</p>
                 @endif
@@ -45,9 +52,11 @@
 
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Percurso Completo</h3>
                 <ol class="list-decimal list-inside space-y-2">
-                    @foreach($demanda->percursos as $percurso)
+                    @forelse($demanda->percursos as $percurso)
                         <li>{{ $percurso->endereco }}</li>
-                    @endforeach
+                    @empty
+                        <p class="text-gray-500">Nenhum percurso definido para esta demanda.</p>
+                    @endforelse
                 </ol>
             </div>
 
@@ -56,12 +65,20 @@
                 @if($demanda->fotosKm)
                     <div>
                         <p class="font-semibold">KM Inicial:</p>
-                        <img src="{{ $demanda->fotosKm->foto_url_inicio }}" alt="Foto KM Inicial" class="mt-2 rounded-lg w-full">
+                        @if($demanda->fotosKm->foto_url_inicio)
+                            <a href="{{ $demanda->fotosKm->foto_url_inicio }}" target="_blank">
+                                <img src="{{ $demanda->fotosKm->foto_url_inicio }}" alt="Foto KM Inicial" class="mt-2 rounded-lg w-full">
+                            </a>
+                        @else
+                           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Sem foto de KM inicial.</p>
+                        @endif
                     </div>
                     @if($demanda->fotosKm->foto_url_final)
                         <div class="mt-4">
                             <p class="font-semibold">KM Final:</p>
-                            <img src="{{ $demanda->fotosKm->foto_url_final }}" alt="Foto KM Final" class="mt-2 rounded-lg w-full">
+                            <a href="{{ $demanda->fotosKm->foto_url_final }}" target="_blank">
+                                <img src="{{ $demanda->fotosKm->foto_url_final }}" alt="Foto KM Final" class="mt-2 rounded-lg w-full">
+                            </a>
                         </div>
                     @else
                         <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Aguardando foto do KM final.</p>
@@ -72,5 +89,12 @@
             </div>
 
         </div>
+
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-6">
+             <a href="{{ route('demandas.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-700 focus:outline-none focus:border-gray-700 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                Voltar para a Lista
+            </a>
+        </div>
     </div>
 </x-app-layout>
+

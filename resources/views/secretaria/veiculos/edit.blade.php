@@ -13,6 +13,15 @@
                     <form method="POST" action="{{ route('veiculos.update', $veiculo->id) }}">
                         @csrf 
                         @method('PUT') 
+
+                        <div class="mt-4">
+                            <label for="tipo" class="block font-medium text-sm text-gray-700 dark:text-gray-300">Tipo</label>
+                            <select id="tipo" name="tipo" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="moto" @selected(old('tipo', $veiculo->tipo) == 'moto')>Moto</option>
+                                <option value="carro" @selected(old('tipo', $veiculo->tipo) == 'carro')>Carro</option>
+                            </select>
+                        </div>
                         
                         <div>
                             <label for="placa" class="block font-medium text-sm text-gray-700 dark:text-gray-300">Placa</label>

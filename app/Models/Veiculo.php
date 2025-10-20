@@ -17,6 +17,7 @@ class Veiculo extends Model
      */
     protected $fillable = [
         'placa',
+        'tipo',
         'modelo',
         'marca',
         'ano',
@@ -31,12 +32,12 @@ class Veiculo extends Model
         $modeloLower = strtolower($this->modelo);
 
         // PRIMEIRO, verifica se é uma moto.
-        if (str_contains($modeloLower, 'moto') || str_contains($modeloLower, 'yamaha')) {
-            return 45.0; // Média para a moto
+        if (str_contains($modeloLower, 'moto') || str_contains($modeloLower, 'moto')) {
+            return 40.0; // Média para a moto
         }
 
         // DEPOIS, verifica se é um Spin.
-        if (str_contains($modeloLower, 'spin')) {
+        if (str_contains($modeloLower, 'carro')) {
             return 10.5; // Média para Spin na cidade com gasolina
         }
 
