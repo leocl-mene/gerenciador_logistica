@@ -1,12 +1,6 @@
-# nixpacks.toml
-
-[start]
-cmd = "php-fpm"
+# nixpacks.toml (Versão Corrigida e Simplificada)
 
 [processes]
-web = "nginx -c /app/nginx.conf"
-
-[services.web]
-port = "80"
-# A LINHA MAIS IMPORTANTE: Define o diretório público para /public
-rootDir = "/app/public"
+# Diz ao processo 'web' (que o Nixpacks detecta automaticamente para o Laravel)
+# para usar a pasta /app/public como sua raiz.
+web.rootDir = "/app/public"
