@@ -130,7 +130,7 @@ class DemandaController extends Controller
 
         // 4. Envia a mensagem para o token específico
         try {
-             $messaging->send($message->withchangedTargetTarget('token', $motoboy->fcm_token));
+             $messaging->send($message->withChangedTarget('token', $motoboy->fcm_token));
         } catch (\Throwable $e) {
             // Logar erro de envio se necessário
             // Log::error("FCM failed for user {$motoboy->id}: {$e->getMessage()}");
