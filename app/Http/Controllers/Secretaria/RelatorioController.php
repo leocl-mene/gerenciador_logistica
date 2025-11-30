@@ -18,10 +18,8 @@ class RelatorioController extends Controller
      */
     public function index()
     {
-        // Busca todos os veículos para preencher o <select> no formulário
         $veiculos = Veiculo::orderBy('modelo')->get();
 
-        // Busca o preço da gasolina (padrão '0.00' se não encontrar)
         $preco_gasolina = Setting::where('key', 'preco_gasolina')->first()->value ?? '0.00';
         
         return view('secretaria.relatorios.index', compact('veiculos', 'preco_gasolina'));
@@ -32,42 +30,45 @@ class RelatorioController extends Controller
      */
     public function generate(Request $request)
     {
-        // VALIDAÇÃO ATUALIZADA para aceitar um array de IDs
         $request->validate([
             'veiculos_ids' => 'required|array',
-            'veiculos_ids.*' => 'exists:veiculos,id', // Garante que cada ID no array existe na tabela de veículos
+            'veiculos_ids.*' => 'exists:veiculos,id',
             'data_inicio' => 'required|date',
             'data_fim' => 'required|date|after_or_equal:data_inicio',
             'action' => 'required|in:preview,download'
         ]);
 
         $veiculosIds = $request->veiculos_ids;
-        $dataInicio = Carbon::parse($request->data_inicio)->startOfDay();
-        $dataFim = Carbon::parse($request->data_fim)->endOfDay();
+        $dataInicio  = Carbon::parse($request->data_inicio)->startOfDay();
+        $dataFim     = Carbon::parse($request->data_fim)->endOfDay();
         
-        // CONSULTA ATUALIZADA para usar whereIn e carregar a relação 'gpsTracks'
+        // 🔥 ATUALIZADO: percursos foi removido do sistema
         $demandas = Demanda::whereIn('veiculo_id', $veiculosIds)
             ->where('status', 'Finalizada')
             ->whereBetween('data_finalizacao', [$dataInicio, $dataFim])
-            // CORREÇÃO APLICADA AQUI: Adicionado 'gpsTracks' ao pré-carregamento
-            ->with(['percursos', 'motoboy', 'veiculo', 'gpsTracks']) 
+            ->with([
+                'motoboy',
+                'veiculo',
+                'gpsTracks',
+                'fotosKm'
+            ])
             ->orderBy('data_finalizacao', 'asc')
             ->get();
-        
+
         $preco_gasolina = Setting::where('key', 'preco_gasolina')->first()->value ?? '0.00';
 
         if ($request->action == 'download') {
             $fileName = "Relatorio_Veiculos_{$dataInicio->format('d-m-Y')}_a_{$dataFim->format('d-m-Y')}.xlsx";
-            
-            // Passa o preço da gasolina para a classe de exportação
-            return Excel::download(new VeiculoReportExport($demandas, $preco_gasolina), $fileName);
+            return Excel::download(
+                new VeiculoReportExport($demandas, $preco_gasolina),
+                $fileName
+            );
         }
 
-        // Retorna para a view com os dados para a pré-visualização
+        // Prévia na tela
         return view('secretaria.relatorios.index', [
             'veiculos' => Veiculo::orderBy('modelo')->get(),
-            // Passa os IDs selecionados de volta para a view
-            'veiculos_selecionados_ids' => $veiculosIds, 
+            'veiculos_selecionados_ids' => $veiculosIds,
             'demandas' => $demandas,
             'data_inicio' => $request->data_inicio,
             'data_fim' => $request->data_fim,
