@@ -7,7 +7,24 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @php
+                $activeTab = $tab ?? 'demandas';
+            @endphp
+
+            <div class="flex flex-wrap gap-2 mb-6">
+                <a href="{{ route('relatorios.index') }}"
+                   class="px-4 py-2 rounded font-semibold {{ $activeTab === 'demandas' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                    Demandas
+                </a>
+                <a href="{{ route('relatorios.abastecimentos') }}"
+                   class="px-4 py-2 rounded font-semibold {{ $activeTab === 'abastecimentos' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                    Abastecimentos
+                </a>
+            </div>
+
             
+            @if($activeTab === 'demandas')
+
             {{-- Formulário de Configuração do Preço da Gasolina --}}
             <div class="bg-white dark:bg-gray-800 shadow-xl sm:rounded-lg p-6 mb-6">
                 <form action="{{ route('settings.update') }}" method="POST">
@@ -180,6 +197,98 @@
                     </div>
                 </div>
             </div>
+            @endif
+
+            @endif
+
+            @if($activeTab === 'abastecimentos')
+                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+                    <form action="{{ route('relatorios.abastecimentos') }}" method="GET">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label for="data_inicio_abast" class="block font-medium text-sm text-gray-700 dark:text-gray-300">Data de Inicio</label>
+                                <input type="date" name="data_inicio" id="data_inicio_abast" value="{{ $data_inicio ?? '' }}" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500" required>
+                            </div>
+                            <div>
+                                <label for="data_fim_abast" class="block font-medium text-sm text-gray-700 dark:text-gray-300">Data Final</label>
+                                <input type="date" name="data_fim" id="data_fim_abast" value="{{ $data_fim ?? '' }}" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Selecione um ou mais veiculos (opcional)</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 max-h-60 overflow-y-auto">
+                                @foreach($veiculos as $veiculo)
+                                    <label class="flex items-center space-x-2 cursor-pointer p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                                        <input type="checkbox" name="veiculos_ids[]" value="{{ $veiculo->id }}"
+                                                class="rounded dark:bg-gray-900 border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                @checked(in_array($veiculo->id, $veiculos_selecionados_ids ?? []))>
+                                        <span class="text-sm text-gray-800 dark:text-gray-200 font-medium whitespace-nowrap">
+                                            {{ $veiculo->placa }}
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 mt-6">
+                            <button type="submit" class="justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                                Filtrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                @if(isset($abastecimentos))
+                <div class="mt-6 bg-white dark:bg-gray-800 shadow-xl sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                            Abastecimentos no Periodo
+                        </h3>
+                        <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 sm:rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Data</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Veiculo</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Motorista</th>
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Valor (R$)</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cupom</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 text-gray-800 dark:text-gray-200">
+                                    @forelse ($abastecimentos as $abastecimento)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $abastecimento->data_abastecimento->format('d/m/Y') }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">{{ $abastecimento->veiculo->placa ?? 'N/A' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $abastecimento->usuario->name ?? 'N/A' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm">R$ {{ number_format($abastecimento->valor, 2, ',', '.') }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <a href="{{ $abastecimento->foto_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">Ver foto</a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">Nenhum abastecimento encontrado para o periodo.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                                @if(isset($abastecimentos))
+                                <tfoot class="bg-gray-100 dark:bg-gray-900 border-t border-gray-300 dark:border-gray-700">
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-4 text-right font-extrabold uppercase text-gray-900 dark:text-gray-100">Total no Periodo:</td>
+                                        <td class="px-6 py-4 text-center font-extrabold text-lg text-green-600 dark:text-green-400">
+                                            R$ {{ number_format($abastecimentos->sum('valor'), 2, ',', '.') }}
+                                        </td>
+                                        <td class="px-6 py-4"></td>
+                                    </tr>
+                                </tfoot>
+                                @endif
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                @endif
             @endif
 
         </div>

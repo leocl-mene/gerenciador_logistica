@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -31,11 +32,9 @@ class AuthenticatedSessionController extends Controller
         // Lógica de redirecionamento por cargo
         $user = Auth::user();
 
-        if ($user->cargo_id == 1) { // TI
-            return redirect()->route('dashboard.ti');
-        } elseif ($user->cargo_id == 2) { // Secretaria
+        if ($user->cargo_id == User::ROLE_ADMIN) {
             return redirect()->route('dashboard.secretaria');
-        } elseif ($user->cargo_id == 3) { // Motoboy
+        } elseif ($user->cargo_id == User::ROLE_MOTORISTA) {
             return redirect()->route('dashboard.motoboy');
         } else {
             // Rota de segurança para cargos inválidos
@@ -58,4 +57,3 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }
 }
-

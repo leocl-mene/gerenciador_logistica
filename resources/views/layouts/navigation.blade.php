@@ -16,13 +16,17 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    @if(Auth::user()->cargo_id == 2 || Auth::user()->cargo_id == 1)
+                    @if(Auth::user()->cargo_id == 1)
                         <x-nav-link :href="route('veiculos.index')" :active="request()->routeIs('veiculos.*')">
                             {{ __('Veículos') }}
                         </x-nav-link>
 
                         <x-nav-link :href="route('motoboys.index')" :active="request()->routeIs('motoboys.*')">
-                            {{ __('Motoboys') }}
+                            {{ __('Motoristas') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('administradores.index')" :active="request()->routeIs('administradores.*')">
+                            {{ __('Administradores') }}
                         </x-nav-link>
 
                         {{-- LINK DE DEMANDAS --}}
@@ -91,12 +95,15 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             
-            @if(Auth::user()->cargo_id == 2 || Auth::user()->cargo_id == 1)
+            @if(Auth::user()->cargo_id == 1)
                 <x-responsive-nav-link :href="route('veiculos.index')" :active="request()->routeIs('veiculos.*')">
                     {{ __('Veículos') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('motoboys.index')" :active="request()->routeIs('motoboys.*')">
-                    {{ __('Motoboys') }}
+                    {{ __('Motoristas') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('administradores.index')" :active="request()->routeIs('administradores.*')">
+                    {{ __('Administradores') }}
                 </x-responsive-nav-link>
                 {{-- LINK DE DEMANDAS --}}
                 <x-responsive-nav-link :href="route('demandas.index')" :active="request()->routeIs('demandas.*')">

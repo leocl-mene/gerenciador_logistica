@@ -13,7 +13,7 @@
                     <form method="POST" action="{{ route('motoboys.veiculos.salvar', $motoboy->id) }}">
                         @csrf
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                            Selecione os veículos que este motoboy pode utilizar:
+                            Selecione os veículos que este motorista pode utilizar:
                         </h3>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

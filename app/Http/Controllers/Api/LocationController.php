@@ -10,7 +10,7 @@ class LocationController extends Controller
 {
     public function onlineMotoboys()
     {
-        $motoboys = User::where('cargo_id', 3) // Apenas Motoboys
+        $motoboys = User::whereIn('cargo_id', [User::ROLE_MOTORISTA, User::ROLE_ADMIN]) // Apenas Motoboys
                           ->where('status_online', true) // Apenas os que estão online
                           ->whereNotNull(['ultima_latitude', 'ultima_longitude']) // Garante que eles têm uma localização válida
                           ->get(['id', 'name', 'ultima_latitude', 'ultima_longitude']); // Pega apenas os dados necessários

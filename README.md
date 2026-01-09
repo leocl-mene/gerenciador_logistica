@@ -1,61 +1,120 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+﻿# Gerenciador Logistica
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema de gestao de demandas e operacao de motoristas, com painel web (Laravel) e aplicativo Flutter integrado.
 
-## About Laravel
+## Visao geral
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+O sistema e dividido em duas partes principais:
+- Web (Laravel): cadastro de veiculos, motoristas e administradores, criacao de demandas, acompanhamento em tempo real e relatorios.
+- App (Flutter): motoristas aceitam/iniciam/finalizam demandas, enviam GPS e registram abastecimentos com foto do cupom.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Principais funcionalidades:
+- Demandas normais e urgentes
+- Rastreamento GPS em tempo real
+- Relatorios de uso e custos
+- Registro de abastecimentos
+- Configuracao de preco da gasolina e consumo km/L por veiculo
+- Notificacoes (FCM)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Perfis de acesso
 
-## Learning Laravel
+- Administrador: acesso total ao painel web e pode usar o app. Recebe todos os veiculos no app.
+- Motorista: acesso ao app e operacao das demandas.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Estrutura do projeto
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- app/: modelos, controllers e regras de negocio
+- routes/: rotas web e API
+- resources/views/: telas do painel
+- database/migrations/: migrations do banco
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+O aplicativo Flutter fica em uma pasta separada no mesmo workspace: `motoboy_app/`.
 
-## Laravel Sponsors
+## Requisitos
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP 8.1+
+- Composer
+- Node.js + NPM
+- Banco de dados (MySQL recomendado)
+- Extensoes PHP comuns do Laravel
 
-### Premium Partners
+## Instalacao (backend)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1) Instale dependencias:
+```
+composer install
+npm install
+```
 
-## Contributing
+2) Configure o ambiente:
+- Copie `.env.example` para `.env`
+- Configure DB, APP_URL e credenciais do Firebase/FCM
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3) Gere a chave:
+```
+php artisan key:generate
+```
 
-## Code of Conduct
+4) Rode as migrations:
+```
+php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5) Link de storage para uploads:
+```
+php artisan storage:link
+```
 
-## Security Vulnerabilities
+6) Suba o servidor local:
+```
+php artisan serve
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Instalacao (app Flutter)
 
-## License
+No diretorio `motoboy_app/`:
+```
+flutter pub get
+flutter run
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Configure o `baseUrl` no arquivo:
+- `motoboy_app/lib/services/api_service.dart`
+
+## API principal (resumo)
+
+- POST `/api/login`
+- POST `/api/logout`
+- GET `/api/demandas-disponiveis`
+- GET `/api/minhas-demandas`
+- POST `/api/demandas/{id}/aceitar`
+- POST `/api/demandas/{id}/iniciar`
+- POST `/api/demandas/{id}/finalizar`
+- POST `/api/demandas/{id}/track`
+- POST `/api/status`
+- POST `/api/fcm-token`
+- GET `/api/meus-veiculos`
+- POST `/api/abastecimentos`
+
+## Relatorios
+
+No painel web:
+- Relatorio de demandas (km, custo e motorista)
+- Relatorio de abastecimentos (valor e cupom)
+
+O custo das demandas usa:
+- Preco da gasolina (configuracao)
+- Consumo km/L definido no veiculo (editavel)
+
+## Uploads
+
+Fotos de KM e cupons ficam em `storage/app/public` e sao servidas via `storage:link`.
+
+## Observacoes
+
+- Rotas e controllers ainda usam o nome tecnico `motoboy` para manter compatibilidade.
+- O texto exibido no sistema foi padronizado para "Motorista".
+
+## Licenca
+
+Projeto proprietario.

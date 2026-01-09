@@ -22,8 +22,8 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Só permite o login de motoboys pela API
-        if ($user->cargo_id != 3) {
+        // Permite login de administradores e motoristas pela API
+        if (!in_array($user->cargo_id, [User::ROLE_ADMIN, User::ROLE_MOTORISTA], true)) {
              return response()->json(['message' => 'Acesso não permitido para este tipo de usuário.'], 403);
         }
 

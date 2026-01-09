@@ -15,6 +15,9 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    public const ROLE_ADMIN = 1;
+    public const ROLE_MOTORISTA = 2;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -76,5 +79,20 @@ class User extends Authenticatable
         // O Laravel vai procurar a tabela 'motoboy_veiculos'
         // e usar as chaves 'user_id' e 'veiculo_id'.
         return $this->belongsToMany(Veiculo::class, 'motoboy_veiculos');
+    }
+
+    public function abastecimentos(): HasMany
+    {
+        return $this->hasMany(Abastecimento::class, 'user_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->cargo_id === self::ROLE_ADMIN;
+    }
+
+    public function isMotorista(): bool
+    {
+        return $this->cargo_id === self::ROLE_MOTORISTA;
     }
 }

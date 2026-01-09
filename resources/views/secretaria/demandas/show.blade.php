@@ -26,7 +26,7 @@
                     </p>
                 @elseif ($demanda->tipo === 'urgente' && $demanda->motoboy)
                     <p>
-                        <strong>Criada como Urgente pelo Motoboy:</strong>
+                        <strong>Criada como Urgente pelo Motorista:</strong>
                         {{ $demanda->motoboy->name }}
                         em {{ $demanda->created_at->format('d/m/Y H:i') }}
                     </p>
@@ -42,7 +42,7 @@
                 <hr class="my-3 border-gray-700">
 
                 @if($demanda->motoboy)
-                    <p><strong>Motoboy:</strong> {{ $demanda->motoboy->name }}</p>
+                    <p><strong>Motorista:</strong> {{ $demanda->motoboy->name }}</p>
                     <p>
                         <strong>Aceita em:</strong>
                         {{ $demanda->data_aceite ? \Carbon\Carbon::parse($demanda->data_aceite)->format('d/m/Y H:i') : 'N/A' }}

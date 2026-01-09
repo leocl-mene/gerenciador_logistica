@@ -39,7 +39,7 @@ class DemandaController extends Controller
     public function create()
     {
         // Pega todos os usuários que são motoboys para popular o dropdown
-        $motoboys = User::where('cargo_id', 3)->orderBy('name')->get();
+        $motoboys = User::where('cargo_id', User::ROLE_MOTORISTA)->orderBy('name')->get();
         $veiculos = Veiculo::orderBy('modelo')->get();
 
         return view('secretaria.demandas.create', compact('motoboys', 'veiculos'));
@@ -158,7 +158,7 @@ class DemandaController extends Controller
         $demanda->load('percursos');
         
         // Buscamos os dados para os dropdowns
-        $motoboys = User::where('cargo_id', 3)->orderBy('name')->get();
+        $motoboys = User::where('cargo_id', User::ROLE_MOTORISTA)->orderBy('name')->get();
 
         // Se a demanda já tem um motoboy, pegamos os veículos dele para pré-popular o select
         $veiculosDoMotoboy = $demanda->motoboy ? $demanda->motoboy->veiculos : collect();

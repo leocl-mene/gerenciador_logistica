@@ -42,6 +42,11 @@
                             <input id="ano" name="ano" type="number" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500" />
                         </div>
 
+                        <div class="mt-4">
+                            <label for="consumo_km_l" class="block font-medium text-sm text-gray-700 dark:text-gray-300">Consumo (km/L)</label>
+                            <input id="consumo_km_l" name="consumo_km_l" type="number" step="0.01" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500" />
+                        </div>
+
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('veiculos.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
                                 Cancelar

@@ -8,6 +8,7 @@ use App\Models\Veiculo; // Import adicionado
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use App\Models\User as AppUser;
 
 class MotoboyController extends Controller
 {
@@ -16,8 +17,8 @@ class MotoboyController extends Controller
      */
     public function index()
     {
-        // Busca todos os usuários onde o cargo_id é 3 (Motoboy)
-        $motoboys = User::where('cargo_id', 3)->latest()->get();
+        // Busca todos os usuários onde o cargo_id é 3 (Motorista)
+        $motoboys = User::where('cargo_id', AppUser::ROLE_MOTORISTA)->latest()->get();
 
         return view('secretaria.motoboys.index', compact('motoboys'));
     }
@@ -43,17 +44,17 @@ class MotoboyController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Criação do novo usuário (motoboy)
+        // Criação do novo usuário (motorista)
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'telefone' => $request->telefone,
             'password' => Hash::make($request->password),
-            'cargo_id' => 3, // Hardcoded para Motoboy
+            'cargo_id' => AppUser::ROLE_MOTORISTA, // Hardcoded para Motorista
         ]);
 
         return redirect()->route('motoboys.index')
-                         ->with('success', 'Motoboy cadastrado com sucesso.');
+                         ->with('success', 'Motorista cadastrado com sucesso.');
     }
 
     /**
@@ -95,7 +96,7 @@ class MotoboyController extends Controller
         $motoboy->update($data);
 
         return redirect()->route('motoboys.index')
-                         ->with('success', 'Motoboy atualizado com sucesso.');
+                         ->with('success', 'Motorista atualizado com sucesso.');
     }
 
     /**
@@ -104,30 +105,30 @@ class MotoboyController extends Controller
     public function destroy(User $motoboy)
     {
         // Medida de segurança para não se auto-excluir ou excluir outros admins
-        if ($motoboy->id === auth()->id() || $motoboy->cargo_id != 3) {
+        if ($motoboy->id === auth()->id() || $motoboy->cargo_id != AppUser::ROLE_MOTORISTA) {
             return back()->with('error', 'Ação não permitida.');
         }
 
         $motoboy->delete();
 
         return redirect()->route('motoboys.index')
-                         ->with('success', 'Motoboy excluído com sucesso.');
+                         ->with('success', 'Motorista excluído com sucesso.');
     }
 
     /**
-     * Mostra a página para gerenciar os veículos de um motoboy.
+     * Mostra a página para gerenciar os veículos de um motorista.
      */
     public function gerenciarVeiculos(User $motoboy)
     {
         $todosVeiculos = Veiculo::orderBy('modelo')->get();
-        // Pega os IDs dos veículos que já estão associados a este motoboy
+        // Pega os IDs dos veículos que já estão associados a este motorista
         $veiculosAtuais = $motoboy->veiculos->pluck('id')->toArray();
 
         return view('secretaria.motoboys.gerenciar-veiculos', compact('motoboy', 'todosVeiculos', 'veiculosAtuais'));
     }
 
     /**
-     * Salva as associações de veículos para um motoboy.
+     * Salva as associações de veículos para um motorista.
      */
     public function salvarVeiculos(Request $request, User $motoboy)
     {
@@ -136,6 +137,6 @@ class MotoboyController extends Controller
         // e mantém as que já existiam, tudo em um único comando.
         $motoboy->veiculos()->sync($request->veiculos_ids ?? []);
 
-        return redirect()->route('motoboys.index')->with('success', 'Veículos associados ao motoboy com sucesso!');
+        return redirect()->route('motoboys.index')->with('success', 'Veículos associados ao motorista com sucesso!');
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DemandaController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\StatusController;
 use App\Http\Controllers\Api\MotoboyController;
+use App\Http\Controllers\Api\AbastecimentoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,4 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Rota para atualizar o token FCM do usuário (NOVA ROTA)
     Route::post('/fcm-token', [StatusController::class, 'updateFcmToken']);
+
+    // Rota para registrar abastecimentos
+    Route::post('/abastecimentos', [AbastecimentoController::class, 'store']);
 });

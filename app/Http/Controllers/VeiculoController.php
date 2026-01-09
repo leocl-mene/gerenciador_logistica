@@ -37,6 +37,7 @@ class VeiculoController extends Controller
             'modelo' => 'required|string|max:100',
             'marca' => 'nullable|string|max:100',
             'ano' => 'nullable|integer|digits:4',
+            'consumo_km_l' => 'nullable|numeric|min:0.1',
             // 'km_por_litro' foi removido da validação
         ]);
 
@@ -77,6 +78,7 @@ class VeiculoController extends Controller
             'modelo' => 'required|string|max:100',
             'marca' => 'nullable|string|max:100',
             'ano' => 'nullable|integer|digits:4',
+            'consumo_km_l' => 'nullable|numeric|min:0.1',
             // 'km_por_litro' foi removido da validação
         ]);
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany; // IMPORT ADICIONADO
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Veiculo extends Model
 {
@@ -21,7 +22,7 @@ class Veiculo extends Model
         'modelo',
         'marca',
         'ano',
-        // 'km_por_litro' foi removido daqui
+        'consumo_km_l',
     ];
 
     /**
@@ -29,6 +30,10 @@ class Veiculo extends Model
      */
     public function getConsumoPadraoAttribute(): float
     {
+        if (!empty($this->consumo_km_l) && $this->consumo_km_l > 0) {
+            return (float) $this->consumo_km_l;
+        }
+
         $modeloLower = strtolower($this->modelo);
 
         // PRIMEIRO, verifica se é uma moto.
@@ -55,4 +60,9 @@ class Veiculo extends Model
     }
 
     // A partir de agora, o consumo de KM/L pode ser acessado via $veiculo->consumo_padrao
+
+    public function abastecimentos(): HasMany
+    {
+        return $this->hasMany(Abastecimento::class, 'veiculo_id');
+    }
 }

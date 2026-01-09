@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\User as AppUser;
 
 class RegisteredUserController extends Controller
 {
@@ -39,7 +40,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'cargo_id' => 3, // <-- LINHA ADICIONADA!
+            'cargo_id' => AppUser::ROLE_MOTORISTA,
         ]);
 
         event(new Registered($user));
