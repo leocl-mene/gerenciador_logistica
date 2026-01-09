@@ -70,12 +70,18 @@ class AdminController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$administrador->id],
             'telefone' => ['nullable', 'string', 'max:20'],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+            'cargo_id' => ['required', 'in:'.User::ROLE_ADMIN.','.User::ROLE_MOTORISTA],
         ]);
 
-        $data = $request->only('name', 'email', 'telefone');
+        $data = $request->only('name', 'email', 'telefone', 'cargo_id');
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
+        }
+
+        if ((int) $administrador->id === (int) auth()->id()
+            && (int) $data['cargo_id'] !== User::ROLE_ADMIN) {
+            return back()->with('error', 'Nao e permitido remover seu proprio acesso de administrador.');
         }
 
         $administrador->update($data);

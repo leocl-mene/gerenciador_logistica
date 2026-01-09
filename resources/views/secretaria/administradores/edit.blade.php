@@ -18,6 +18,11 @@
                             </ul>
                         </div>
                     @endif
+                    @if (session('error'))
+                        <div class="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700 text-sm">
+                            {{ session('error') }}
+                        </div>
+                    @endif
 
                     <form method="POST" action="{{ route('administradores.update', $administrador->id) }}">
                         @csrf
@@ -33,6 +38,13 @@
                         <div class="mt-4">
                             <x-input-label for="telefone" :value="__('Telefone')" />
                             <x-text-input id="telefone" class="block mt-1 w-full" type="text" name="telefone" :value="old('telefone', $administrador->telefone)" />
+                        </div>
+                        <div class="mt-4">
+                            <x-input-label for="cargo_id" :value="__('Cargo')" />
+                            <select id="cargo_id" name="cargo_id" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900">
+                                <option value="1" @selected(old('cargo_id', $administrador->cargo_id) == 1)>Administrador</option>
+                                <option value="2" @selected(old('cargo_id', $administrador->cargo_id) == 2)>Motorista</option>
+                            </select>
                         </div>
                         <div class="mt-4">
                             <x-input-label for="password" :value="__('Senha')" />

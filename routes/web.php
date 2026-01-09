@@ -39,7 +39,9 @@ Route::middleware(['auth', 'cargo:1'])->group(function () {
     Route::post('/motoboys/{motoboy}/veiculos', [MotoboyController::class, 'salvarVeiculos'])->name('motoboys.veiculos.salvar');
 
     // Rota de resource para Administradores
-    Route::resource('administradores', AdminController::class);
+    Route::resource('administradores', AdminController::class)->parameters([
+        'administradores' => 'administrador',
+    ]);
 
     // Rota de resource para Demandas, acessível pela Secretaria
     Route::resource('demandas', DemandaController::class);
