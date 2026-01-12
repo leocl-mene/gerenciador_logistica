@@ -39,7 +39,9 @@
                     if (motoristaMarkers.has(motorista.id)) {
                         const entry = motoristaMarkers.get(motorista.id);
                         entry.marker.setPosition(position);
-                        entry.infoWindow.setContent(`<strong>${motorista.name}</strong>`);
+                        entry.infoWindow.setContent(
+                            `<div style="background:#111;color:#fff;padding:6px 10px;border-radius:6px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.3);">${motorista.name}</div>`
+                        );
                     } else {
                         const marker = new google.maps.Marker({
                             position,
@@ -47,7 +49,7 @@
                             title: motorista.name,
                         });
                         const infoWindow = new google.maps.InfoWindow({
-                            content: `<strong>${motorista.name}</strong>`,
+                            content: `<div style="background:#111;color:#fff;padding:6px 10px;border-radius:6px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.3);">${motorista.name}</div>`,
                         });
                         marker.addListener('click', () => {
                             infoWindow.open({ anchor: marker, map, shouldFocus: false });
