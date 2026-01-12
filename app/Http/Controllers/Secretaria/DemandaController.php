@@ -72,22 +72,32 @@ class DemandaController extends Controller
             'data_aceite' => Carbon::now(),
         ]);
 
-        // 2. Salva cada ponto do percurso com geocodificação
+        // 2. Salva cada ponto do percurso com geocodificacao (Google Maps)
         foreach ($request->percursos as $index => $endereco) {
-            $response = Http::get('https://nominatim.openstreetmap.org/search', [
-                'q' => $endereco,
-                'format' => 'json',
-                'countrycodes' => 'br',
-                'limit' => 1
-            ]);
-            $location = $response->json()[0] ?? null;
+            $latitude = null;
+            $longitude = null;
+            $apiKey = config('services.google_maps.key');
+
+            if (!empty($apiKey)) {
+                $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
+                    'address' => $endereco,
+                    'key' => $apiKey,
+                    'region' => 'br',
+                ]);
+                $data = $response->json();
+                $location = $data['results'][0]['geometry']['location'] ?? null;
+                if ($location) {
+                    $latitude = $location['lat'] ?? null;
+                    $longitude = $location['lng'] ?? null;
+                }
+            }
 
             DemandaPercurso::create([
                 'demanda_id' => $demanda->id,
                 'ordem' => $index + 1,
                 'endereco' => $endereco,
-                'latitude' => $location['lat'] ?? null,
-                'longitude' => $location['lon'] ?? null,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
             ]);
         }
         
@@ -198,20 +208,30 @@ class DemandaController extends Controller
         $demanda->percursos()->delete();
 
         foreach ($request->percursos as $index => $endereco) {
-            $response = Http::get('https://nominatim.openstreetmap.org/search', [
-                'q' => $endereco,
-                'format' => 'json',
-                'countrycodes' => 'br',
-                'limit' => 1
-            ]);
-            $location = $response->json()[0] ?? null;
+            $latitude = null;
+            $longitude = null;
+            $apiKey = config('services.google_maps.key');
+
+            if (!empty($apiKey)) {
+                $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
+                    'address' => $endereco,
+                    'key' => $apiKey,
+                    'region' => 'br',
+                ]);
+                $data = $response->json();
+                $location = $data['results'][0]['geometry']['location'] ?? null;
+                if ($location) {
+                    $latitude = $location['lat'] ?? null;
+                    $longitude = $location['lng'] ?? null;
+                }
+            }
 
             DemandaPercurso::create([
                 'demanda_id' => $demanda->id,
                 'ordem' => $index + 1,
                 'endereco' => $endereco,
-                'latitude' => $location['lat'] ?? null,
-                'longitude' => $location['lon'] ?? null,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
             ]);
         }
         

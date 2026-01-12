@@ -19,46 +19,60 @@
 
     @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // 1. Inicializa o mapa centralizado em Manaus
-            const map = L.map('map').setView([-3.1190, -60.0217], 13);
+        let map;
+        const motoristaMarkers = new Map();
 
-            // 2. Adiciona a camada de mapa do OpenStreetMap
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+        async function fetchMotoristas() {
+            try {
+                const response = await fetch('/api/motoboys-online');
+                const motoristas = await response.json();
+                const seen = new Set();
 
-            // 3. Cria um grupo de marcadores para poder limpar e redesenhar
-            let motoboyMarkers = L.layerGroup().addTo(map);
+                motoristas.forEach(motorista => {
+                    const lat = parseFloat(motorista.ultima_latitude);
+                    const lng = parseFloat(motorista.ultima_longitude);
+                    if (Number.isNaN(lat) || Number.isNaN(lng)) return;
 
-            // 4. Função para buscar e desenhar os motoristas no mapa
-            async function fetchMotoristas() {
-                try {
-                    const response = await fetch('/api/motoboys-online');
-                    const motoristas = await response.json();
+                    const position = { lat, lng };
+                    seen.add(motorista.id);
 
-                    // Limpa os marcadores antigos
-                    motoboyMarkers.clearLayers();
+                    if (motoristaMarkers.has(motorista.id)) {
+                        motoristaMarkers.get(motorista.id).setPosition(position);
+                    } else {
+                        const marker = new google.maps.Marker({
+                            position,
+                            map,
+                            title: motorista.name,
+                        });
+                        motoristaMarkers.set(motorista.id, marker);
+                    }
+                });
 
-                    // Adiciona um novo marcador para cada motoboy online
-                    motoristas.forEach(motorista => {
-                        const lat = motorista.ultima_latitude;
-                        const lon = motorista.ultima_longitude;
-
-                        const marker = L.marker([lat, lon]).addTo(motoboyMarkers);
-                        marker.bindPopup(`<b>${motorista.name}</b>`);
-                    });
-
-                } catch (error) {
-                    console.error('Erro ao buscar a localização dos motoristas:', error);
-                }
+                motoristaMarkers.forEach((marker, id) => {
+                    if (!seen.has(id)) {
+                        marker.setMap(null);
+                        motoristaMarkers.delete(id);
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao buscar a localizacao dos motoristas:', error);
             }
+        }
 
-            // 5. Busca os motoristas imediatamente ao carregar a página...
+        function initMap() {
+            const center = { lat: -3.1190, lng: -60.0217 };
+            map = new google.maps.Map(document.getElementById('map'), {
+                center,
+                zoom: 13,
+            });
+
             fetchMotoristas();
-            // ...e depois busca a cada 10 segundos para atualizar as posições.
-            setInterval(fetchMotoristas, 10000); 
-        });
+            setInterval(fetchMotoristas, 3000);
+        }
+
+        window.initMap = initMap;
     </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap" async defer></script>
     @endpush
+
 </x-app-layout>
