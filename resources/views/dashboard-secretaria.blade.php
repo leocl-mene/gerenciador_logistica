@@ -22,6 +22,38 @@
         let map;
         const motoristaMarkers = new Map();
 
+        function formatUltimoUpdate(isoString) {
+            if (!isoString) return 'Sem atualizacao';
+            const date = new Date(isoString);
+            if (Number.isNaN(date.getTime())) return 'Sem atualizacao';
+            const hh = String(date.getHours()).padStart(2, '0');
+            const mm = String(date.getMinutes()).padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
+
+        function getMarkerIcon(isOnline) {
+            const color = isOnline ? '#22c55e' : '#9ca3af';
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: color,
+                fillOpacity: 1,
+                strokeColor: '#111827',
+                strokeWeight: 2,
+                scale: 8,
+            };
+        }
+
+        function buildInfoContent(motorista) {
+            const status = motorista.status_online ? 'Online' : 'Offline';
+            const ultimo = formatUltimoUpdate(motorista.ultimo_update);
+            return `
+                <div style="background:#111;color:#fff;padding:8px 10px;border-radius:8px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.3);">
+                    <div>${motorista.name}</div>
+                    <div style="font-size:12px;font-weight:500;margin-top:2px;opacity:.85;">${status} · ${ultimo}</div>
+                </div>
+            `;
+        }
+
         async function fetchMotoristas() {
             try {
                 const response = await fetch('/api/motoboys-online');
@@ -35,21 +67,22 @@
 
                     const position = { lat, lng };
                     seen.add(motorista.id);
+                    const isOnline = Boolean(motorista.status_online);
 
                     if (motoristaMarkers.has(motorista.id)) {
                         const entry = motoristaMarkers.get(motorista.id);
                         entry.marker.setPosition(position);
-                        entry.infoWindow.setContent(
-                            `<div style="background:#111;color:#fff;padding:6px 10px;border-radius:6px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.3);">${motorista.name}</div>`
-                        );
+                        entry.marker.setIcon(getMarkerIcon(isOnline));
+                        entry.infoWindow.setContent(buildInfoContent(motorista));
                     } else {
                         const marker = new google.maps.Marker({
                             position,
                             map,
                             title: motorista.name,
+                            icon: getMarkerIcon(isOnline),
                         });
                         const infoWindow = new google.maps.InfoWindow({
-                            content: `<div style="background:#111;color:#fff;padding:6px 10px;border-radius:6px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.3);">${motorista.name}</div>`,
+                            content: buildInfoContent(motorista),
                         });
                         marker.addListener('click', () => {
                             infoWindow.open({ anchor: marker, map, shouldFocus: false });
