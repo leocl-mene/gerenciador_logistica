@@ -96,10 +96,27 @@
 
                                         {{-- AÇÃO (somente ver) --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('demandas.show', $demanda->id) }}"
-                                               class="text-green-600 hover:text-green-900 dark:text-green-400">
-                                                Ver Detalhes
-                                            </a>
+                                            <div class="flex items-center justify-end gap-3">
+                                                <a href="{{ route('demandas.show', $demanda->id) }}"
+                                                   class="text-green-600 hover:text-green-900 dark:text-green-400">
+                                                    Ver Detalhes
+                                                </a>
+
+                                                @if (!in_array($demanda->status, ['Aceita', 'Em Rota']))
+                                                    <form action="{{ route('demandas.destroy', $demanda->id) }}" method="POST"
+                                                          onsubmit="return confirm('Tem certeza que deseja excluir esta demanda?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400">
+                                                            Excluir
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <span class="text-gray-400 cursor-not-allowed" title="Demanda em andamento">
+                                                        Excluir
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
