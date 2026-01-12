@@ -94,6 +94,13 @@
                     @php
                         $primeiro = $demanda->gpsTracks->first();
                         $ultimo   = $demanda->gpsTracks->last();
+                        $gpsTracksData = $demanda->gpsTracks
+                            ->map(fn ($t) => [
+                                'lat' => (float) $t->latitude,
+                                'lng' => (float) $t->longitude,
+                                'recorded_at' => \Carbon\Carbon::parse($t->recorded_at)->toIso8601String(),
+                            ])
+                            ->values();
                     @endphp
 
                     <div class="space-y-2 text-sm">
@@ -188,13 +195,7 @@
     @if($totalPontos > 0)
         @push('scripts')
         <script>
-            const gpsTracks = @json($demanda->gpsTracks->map(function ($t) {
-                return [
-                    'lat' => (float) $t->latitude,
-                    'lng' => (float) $t->longitude,
-                    'recorded_at' => \Carbon\Carbon::parse($t->recorded_at)->toIso8601String(),
-                ];
-            }));
+            const gpsTracks = @json($gpsTracksData);
 
             function toRad(value) {
                 return (value * Math.PI) / 180;
