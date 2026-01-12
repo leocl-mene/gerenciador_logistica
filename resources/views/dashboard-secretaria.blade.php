@@ -37,20 +37,28 @@
                     seen.add(motorista.id);
 
                     if (motoristaMarkers.has(motorista.id)) {
-                        motoristaMarkers.get(motorista.id).setPosition(position);
+                        const entry = motoristaMarkers.get(motorista.id);
+                        entry.marker.setPosition(position);
+                        entry.infoWindow.setContent(`<strong>${motorista.name}</strong>`);
                     } else {
                         const marker = new google.maps.Marker({
                             position,
                             map,
                             title: motorista.name,
                         });
-                        motoristaMarkers.set(motorista.id, marker);
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: `<strong>${motorista.name}</strong>`,
+                        });
+                        marker.addListener('click', () => {
+                            infoWindow.open({ anchor: marker, map, shouldFocus: false });
+                        });
+                        motoristaMarkers.set(motorista.id, { marker, infoWindow });
                     }
                 });
 
-                motoristaMarkers.forEach((marker, id) => {
+                motoristaMarkers.forEach((entry, id) => {
                     if (!seen.has(id)) {
-                        marker.setMap(null);
+                        entry.marker.setMap(null);
                         motoristaMarkers.delete(id);
                     }
                 });
