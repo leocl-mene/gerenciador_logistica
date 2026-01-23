@@ -35,9 +35,35 @@
                 @if($demanda->veiculo)
                     <p>
                         <strong>Veiculo Utilizado:</strong>
-                        {{ $demanda->veiculo->modelo }} ({{ $demanda->veiculo->placa }})
+                        {{ $demanda->veiculo->modelo }}
                     </p>
                 @endif
+
+                <div class="mt-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Alterar veiculo (administrador)</h4>
+                    <form action="{{ route('demandas.update-veiculo', $demanda->id) }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        @csrf
+                        @method('PATCH')
+                        <div class="md:col-span-2">
+                            <label for="veiculo_id" class="block text-sm text-gray-700 dark:text-gray-300">Veiculo</label>
+                            <select name="veiculo_id" id="veiculo_id" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                @foreach($veiculos as $veiculo)
+                                    <option value="{{ $veiculo->id }}" @selected((int)$demanda->veiculo_id === (int)$veiculo->id)>
+                                        {{ $veiculo->modelo }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('veiculo_id')
+                                <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded">
+                                Salvar veiculo
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
                 <hr class="my-3 border-gray-700">
 

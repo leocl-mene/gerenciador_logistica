@@ -158,7 +158,9 @@ class DemandaController extends Controller
         // a secretaria que criou, e as fotos do KM.
         $demanda->load(['percursos', 'motoboy', 'secretaria', 'fotosKm', 'veiculo']);
 
-        return view('secretaria.demandas.show', compact('demanda'));
+        $veiculos = Veiculo::orderBy('modelo')->get();
+
+        return view('secretaria.demandas.show', compact('demanda', 'veiculos'));
     }
 
     /**
@@ -275,6 +277,19 @@ class DemandaController extends Controller
         ]);
 
         return back()->with('success', 'KM atualizado com sucesso.');
+    }
+
+    public function updateVeiculo(Request $request, Demanda $demanda)
+    {
+        $request->validate([
+            'veiculo_id' => 'required|exists:veiculos,id',
+        ]);
+
+        $demanda->update([
+            'veiculo_id' => $request->veiculo_id,
+        ]);
+
+        return back()->with('success', 'Veiculo atualizado com sucesso.');
     }
 
     /**

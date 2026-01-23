@@ -46,6 +46,7 @@ Route::middleware(['auth', 'cargo:1'])->group(function () {
     // Rota de resource para Demandas, acessível pela Secretaria
     Route::resource('demandas', DemandaController::class);
     Route::patch('/demandas/{demanda}/km', [DemandaController::class, 'updateKm'])->name('demandas.update-km');
+    Route::patch('/demandas/{demanda}/veiculo', [DemandaController::class, 'updateVeiculo'])->name('demandas.update-veiculo');
 
     // Rotas para Geração de Relatórios
     Route::get('/relatorios', [RelatorioController::class, 'index'])->name('relatorios.index');
