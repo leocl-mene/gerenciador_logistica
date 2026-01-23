@@ -8,9 +8,11 @@ use App\Models\Veiculo;
 use App\Models\Demanda;
 use App\Models\Abastecimento;
 use App\Models\Setting;
+use App\Models\User;
 use App\Exports\VeiculoReportExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class RelatorioController extends Controller
 {
@@ -19,12 +21,14 @@ class RelatorioController extends Controller
      */
     public function index(Request $request)
     {
-        $veiculos = Veiculo::orderBy('modelo')->get();
+        $veiculos = Veiculo::with('motoboys')->orderBy('modelo')->get();
+        $motoboys = User::where('cargo_id', User::ROLE_MOTORISTA)->orderBy('name')->get();
 
         $preco_gasolina = Setting::where('key', 'preco_gasolina')->first()->value ?? '0.00';
         
         return view('secretaria.relatorios.index', [
             'veiculos' => $veiculos,
+            'motoboys' => $motoboys,
             'preco_gasolina' => $preco_gasolina,
             'tab' => $request->get('tab', 'demandas'),
         ]);
@@ -40,25 +44,33 @@ class RelatorioController extends Controller
             'veiculos_ids.*' => 'exists:veiculos,id',
             'data_inicio' => 'required|date',
             'data_fim' => 'required|date|after_or_equal:data_inicio',
-            'action' => 'required|in:preview,download'
+            'action' => 'required|in:preview,download',
+            'motoboy_id' => 'nullable|exists:users,id',
         ]);
 
         $veiculosIds = $request->veiculos_ids;
+        $motoboyId = $request->motoboy_id;
         $dataInicio  = Carbon::parse($request->data_inicio)->startOfDay();
         $dataFim     = Carbon::parse($request->data_fim)->endOfDay();
         
         // 🔥 ATUALIZADO: percursos foi removido do sistema
-        $demandas = Demanda::whereIn('veiculo_id', $veiculosIds)
+        $query = Demanda::whereIn('veiculo_id', $veiculosIds)
             ->where('status', 'Finalizada')
             ->whereBetween('data_finalizacao', [$dataInicio, $dataFim])
             ->with([
                 'motoboy',
                 'veiculo',
                 'gpsTracks',
-                'fotosKm'
+                'fotosKm',
+                'percursos',
             ])
-            ->orderBy('data_finalizacao', 'asc')
-            ->get();
+            ->orderBy('data_finalizacao', 'asc');
+
+        if (!empty($motoboyId)) {
+            $query->where('motoboy_id', $motoboyId);
+        }
+
+        $demandas = $query->get();
 
         $preco_gasolina = Setting::where('key', 'preco_gasolina')->first()->value ?? '0.00';
 
@@ -72,8 +84,10 @@ class RelatorioController extends Controller
 
         // Prévia na tela
         return view('secretaria.relatorios.index', [
-            'veiculos' => Veiculo::orderBy('modelo')->get(),
+            'veiculos' => Veiculo::with('motoboys')->orderBy('modelo')->get(),
+            'motoboys' => User::where('cargo_id', User::ROLE_MOTORISTA)->orderBy('name')->get(),
             'veiculos_selecionados_ids' => $veiculosIds,
+            'motoboy_id' => $motoboyId,
             'demandas' => $demandas,
             'data_inicio' => $request->data_inicio,
             'data_fim' => $request->data_fim,
@@ -87,7 +101,7 @@ class RelatorioController extends Controller
      */
     public function abastecimentos(Request $request)
     {
-        $veiculos = Veiculo::orderBy('modelo')->get();
+        $veiculos = Veiculo::with('motoboys')->orderBy('modelo')->get();
         $preco_gasolina = Setting::where('key', 'preco_gasolina')->first()->value ?? '0.00';
 
         $abastecimentos = collect();
@@ -124,5 +138,23 @@ class RelatorioController extends Controller
             'preco_gasolina' => $preco_gasolina,
             'tab' => 'abastecimentos',
         ]);
+    }
+
+    public function destroyAbastecimento(Abastecimento $abastecimento)
+    {
+        $fotoUrl = $abastecimento->foto_url;
+        if (!empty($fotoUrl)) {
+            $publicBase = Storage::disk('public')->url('/');
+            if (str_starts_with($fotoUrl, $publicBase)) {
+                $relativePath = ltrim(substr($fotoUrl, strlen($publicBase)), '/');
+                if ($relativePath !== '') {
+                    Storage::disk('public')->delete($relativePath);
+                }
+            }
+        }
+
+        $abastecimento->delete();
+
+        return back()->with('abastecimento_success', 'Abastecimento excluido com sucesso.');
     }
 }

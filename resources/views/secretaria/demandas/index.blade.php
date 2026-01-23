@@ -31,6 +31,9 @@
                                         Título
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Veiculo
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Status
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -56,6 +59,16 @@
                                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 font-semibold">
                                                 {{ $demanda->titulo }}
                                             </a>
+                                            @if(!empty($demanda->descricao))
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ \Illuminate\Support\Str::limit($demanda->descricao, 80) }}
+                                                </div>
+                                            @endif
+                                        </td>
+
+                                        {{-- VEICULO --}}
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            {{ $demanda->veiculo->modelo ?? 'N/A' }}
                                         </td>
 
                                         {{-- STATUS --}}
@@ -121,7 +134,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-4 text-center dark:text-gray-400">
+                                        <td colspan="7" class="px-6 py-4 text-center dark:text-gray-400">
                                             Nenhuma demanda lançada.
                                         </td>
                                     </tr>

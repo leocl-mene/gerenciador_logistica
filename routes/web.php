@@ -45,11 +45,13 @@ Route::middleware(['auth', 'cargo:1'])->group(function () {
 
     // Rota de resource para Demandas, acessível pela Secretaria
     Route::resource('demandas', DemandaController::class);
+    Route::patch('/demandas/{demanda}/km', [DemandaController::class, 'updateKm'])->name('demandas.update-km');
 
     // Rotas para Geração de Relatórios
     Route::get('/relatorios', [RelatorioController::class, 'index'])->name('relatorios.index');
     Route::get('/relatorios/gerar', [RelatorioController::class, 'generate'])->name('relatorios.generate');
     Route::get('/relatorios/abastecimentos', [RelatorioController::class, 'abastecimentos'])->name('relatorios.abastecimentos');
+    Route::delete('/relatorios/abastecimentos/{abastecimento}', [RelatorioController::class, 'destroyAbastecimento'])->name('relatorios.abastecimentos.destroy');
 
     // ROTA DE CONFIGURAÇÕES
     Route::post('/settings/update', [SettingController::class, 'update'])->name('settings.update');

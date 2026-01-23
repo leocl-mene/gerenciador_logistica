@@ -64,6 +64,15 @@
                             <label for="data_fim" class="block font-medium text-sm text-gray-700 dark:text-gray-300">Data Final</label>
                             <input type="date" name="data_fim" id="data_fim" value="{{ $data_fim ?? '' }}" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500" required>
                         </div>
+                        <div>
+                            <label for="motoboy_id" class="block font-medium text-sm text-gray-700 dark:text-gray-300">Motorista</label>
+                            <select name="motoboy_id" id="motoboy_id" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Todos</option>
+                                @foreach(($motoboys ?? []) as $motoboy)
+                                    <option value="{{ $motoboy->id }}" @selected((string)($motoboy_id ?? '') === (string)$motoboy->id)>{{ $motoboy->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     
                     {{-- SELEÇÃO DE VEÍCULOS COM CHECKBOXES --}}
@@ -74,6 +83,10 @@
                                 @php
                                     // Adicionando um fallback para o consumo caso o accessor retorne algo inválido
                                     $consumo = method_exists($veiculo, 'getConsumoPadraoAttribute') ? $veiculo->consumo_padrao : 'N/A';
+                                    $motoboyNames = $veiculo->motoboys->pluck('name')->join(', ');
+                                    if ($motoboyNames === '') {
+                                        $motoboyNames = 'Sem motorista';
+                                    }
                                 @endphp
                                 <label class="flex items-center space-x-2 cursor-pointer p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                                     {{-- Nome do campo alterado para veiculos_ids[] --}}
@@ -81,9 +94,10 @@
                                             class="rounded dark:bg-gray-900 border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
                                             {{-- Verifica se o ID do veículo está no array de IDs selecionados --}}
                                             @checked(in_array($veiculo->id, $veiculos_selecionados_ids ?? []))>
-                                    <span class="text-sm text-gray-800 dark:text-gray-200 font-medium whitespace-nowrap">
-                                        {{ $veiculo->placa }} 
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">({{ number_format((float)$consumo, 1, ',', '.') }} km/L)</span>
+                                    <span class="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                                        <span class="block">{{ $veiculo->modelo ?? 'Veiculo' }}</span>
+                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Motoristas: {{ $motoboyNames }}</span>
+                                        <span class="block text-xs text-gray-500 dark:text-gray-400">{{ number_format((float)$consumo, 1, ',', '.') }} km/L</span>
                                     </span>
                                 </label>
                             @endforeach
@@ -134,7 +148,7 @@
                                 @forelse ($demandas as $demanda)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">{{ \Carbon\Carbon::parse($demanda->data_finalizacao)->format('d/m/Y') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">{{ $demanda->veiculo->placa ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">{{ $demanda->veiculo->modelo ?? 'N/A' }}</td>
                                         
                                         {{-- CÓDIGO DO PERCURSO ATUALIZADO AQUI --}}
                                         <td class="px-6 py-4 text-sm">
@@ -202,6 +216,11 @@
             @endif
 
             @if($activeTab === 'abastecimentos')
+                @if (session('abastecimento_success'))
+                    <div class="bg-green-100 border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <span class="block sm:inline">{{ session('abastecimento_success') }}</span>
+                    </div>
+                @endif
                 <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
                     <form action="{{ route('relatorios.abastecimentos') }}" method="GET">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -219,12 +238,19 @@
                             <label class="block font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Selecione um ou mais veiculos (opcional)</label>
                             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 max-h-60 overflow-y-auto">
                                 @foreach($veiculos as $veiculo)
+                                    @php
+                                        $motoboyNames = $veiculo->motoboys->pluck('name')->join(', ');
+                                        if ($motoboyNames === '') {
+                                            $motoboyNames = 'Sem motorista';
+                                        }
+                                    @endphp
                                     <label class="flex items-center space-x-2 cursor-pointer p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                                         <input type="checkbox" name="veiculos_ids[]" value="{{ $veiculo->id }}"
                                                 class="rounded dark:bg-gray-900 border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
                                                 @checked(in_array($veiculo->id, $veiculos_selecionados_ids ?? []))>
-                                        <span class="text-sm text-gray-800 dark:text-gray-200 font-medium whitespace-nowrap">
-                                            {{ $veiculo->placa }}
+                                        <span class="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                                            <span class="block">{{ $veiculo->modelo ?? 'Veiculo' }}</span>
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400">Motoristas: {{ $motoboyNames }}</span>
                                         </span>
                                     </label>
                                 @endforeach
@@ -254,29 +280,37 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Motorista</th>
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Valor (R$)</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cupom</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acoes</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 text-gray-800 dark:text-gray-200">
                                     @forelse ($abastecimentos as $abastecimento)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $abastecimento->data_abastecimento->format('d/m/Y') }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">{{ $abastecimento->veiculo->placa ?? 'N/A' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">{{ $abastecimento->veiculo->modelo ?? 'N/A' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $abastecimento->usuario->name ?? 'N/A' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm">R$ {{ number_format($abastecimento->valor, 2, ',', '.') }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                 <a href="{{ $abastecimento->foto_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">Ver foto</a>
                                             </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                                <form action="{{ route('relatorios.abastecimentos.destroy', $abastecimento->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este abastecimento?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800">Excluir</button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">Nenhum abastecimento encontrado para o periodo.</td>
+                                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">Nenhum abastecimento encontrado para o periodo.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                                 @if(isset($abastecimentos))
                                 <tfoot class="bg-gray-100 dark:bg-gray-900 border-t border-gray-300 dark:border-gray-700">
                                     <tr>
-                                        <td colspan="3" class="px-6 py-4 text-right font-extrabold uppercase text-gray-900 dark:text-gray-100">Total no Periodo:</td>
+                                        <td colspan="4" class="px-6 py-4 text-right font-extrabold uppercase text-gray-900 dark:text-gray-100">Total no Periodo:</td>
                                         <td class="px-6 py-4 text-center font-extrabold text-lg text-green-600 dark:text-green-400">
                                             R$ {{ number_format($abastecimentos->sum('valor'), 2, ',', '.') }}
                                         </td>

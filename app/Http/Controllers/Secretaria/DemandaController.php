@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Secretaria;
 
 use App\Http\Controllers\Controller;
 use App\Models\Demanda;
+use App\Models\DemandaKmAjuste;
 use App\Models\DemandaPercurso;
 use App\Models\DemandasFotosKm;
 use App\Models\Veiculo;
@@ -241,6 +242,39 @@ class DemandaController extends Controller
         }
 
         return redirect()->route('demandas.index')->with('success', 'Demanda atualizada com sucesso.');
+    }
+
+    public function updateKm(Request $request, Demanda $demanda)
+    {
+        $request->validate([
+            'km_inicial' => 'nullable|integer|min:0',
+            'km_final' => 'nullable|integer|min:0',
+        ]);
+
+        $kmInicialAntes = $demanda->km_inicial;
+        $kmFinalAntes = $demanda->km_final;
+        $kmInicial = $request->input('km_inicial');
+        $kmFinal = $request->input('km_final');
+
+        if (!is_null($kmInicial) && !is_null($kmFinal) && $kmFinal < $kmInicial) {
+            return back()->with('error', 'O KM final nao pode ser menor que o KM inicial.');
+        }
+
+        $demanda->update([
+            'km_inicial' => $kmInicial,
+            'km_final' => $kmFinal,
+        ]);
+
+        DemandaKmAjuste::create([
+            'demanda_id' => $demanda->id,
+            'user_id' => Auth::id(),
+            'km_inicial_before' => $kmInicialAntes,
+            'km_final_before' => $kmFinalAntes,
+            'km_inicial_after' => $kmInicial,
+            'km_final_after' => $kmFinal,
+        ]);
+
+        return back()->with('success', 'KM atualizado com sucesso.');
     }
 
     /**

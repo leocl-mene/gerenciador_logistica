@@ -66,6 +66,41 @@
                             {{ number_format($demanda->km_final - $demanda->km_inicial, 0, ',', '.') }} km
                         </p>
                     @endif
+
+                    <div class="mt-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Ajustar KM (administrador)</h4>
+                        <form action="{{ route('demandas.update-km', $demanda->id) }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            @csrf
+                            @method('PATCH')
+                            <div>
+                                <label for="km_inicial" class="block text-sm text-gray-700 dark:text-gray-300">KM Inicial</label>
+                                <input type="number" name="km_inicial" id="km_inicial" min="0" value="{{ old('km_inicial', $demanda->km_inicial) }}"
+                                       class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                @error('km_inicial')
+                                    <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="km_final" class="block text-sm text-gray-700 dark:text-gray-300">KM Final</label>
+                                <input type="number" name="km_final" id="km_final" min="0" value="{{ old('km_final', $demanda->km_final) }}"
+                                       class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                @error('km_final')
+                                    <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded">
+                                    Salvar KM
+                                </button>
+                                @if (session('success'))
+                                    <span class="text-sm text-green-600 dark:text-green-400">{{ session('success') }}</span>
+                                @endif
+                                @if (session('error'))
+                                    <span class="text-sm text-red-600 dark:text-red-400">{{ session('error') }}</span>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
                 @endif
 
                 @if($demanda->descricao)

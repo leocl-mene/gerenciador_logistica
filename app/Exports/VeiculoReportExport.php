@@ -70,7 +70,7 @@ class VeiculoReportExport implements FromCollection, WithHeadings, WithMapping
             // DATA
             \Carbon\Carbon::parse($demanda->data_finalizacao)->format('d/m/Y'),
             // VEÍCULO (NOVO)
-            $demanda->veiculo->placa ?? 'N/A',
+            $demanda->veiculo->modelo ?? 'N/A',
             // PERCURSO (Lógica aplicada)
             $percursoString,
             // KM INICIAL
