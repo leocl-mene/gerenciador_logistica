@@ -25,13 +25,20 @@ class DemandaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Carrega todas as demandas (incluindo as urgentes) com os relacionamentos
+        $perPage = (int) $request->query('per_page', 15);
+        $allowedPerPage = [10, 15, 25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 15;
+        }
+
         $demandas = Demanda::with(['secretaria', 'motoboy', 'percursos', 'veiculo'])
                             ->latest()
-                            ->get();
-        return view('secretaria.demandas.index', compact('demandas'));
+                            ->paginate($perPage)
+                            ->appends($request->query());
+
+        return view('secretaria.demandas.index', compact('demandas', 'perPage'));
     }
 
     /**

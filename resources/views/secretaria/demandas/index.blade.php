@@ -19,12 +19,28 @@
                 </div>
             @endif
 
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div class="text-sm text-gray-600 dark:text-gray-300">
+                    Mostrando {{ $demandas->count() }} de {{ $demandas->total() }} demandas
+                </div>
+                <form method="GET" action="{{ route('demandas.index') }}" class="flex items-center gap-2">
+                    <label for="per_page" class="text-sm text-gray-600 dark:text-gray-300">Por pagina</label>
+                    <select id="per_page" name="per_page"
+                            class="rounded-md border-gray-300 dark:bg-gray-900 dark:text-gray-300 text-sm"
+                            onchange="this.form.submit()">
+                        @foreach([10,15,25,50,100] as $size)
+                            <option value="{{ $size }}" @selected(($perPage ?? 15) == $size)>{{ $size }}</option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
 
                     {{-- Lista de Demandas (somente leitura) --}}
                     <div class="overflow-x-auto -mx-6">
-                        <div class="min-w-[1100px] px-6">
+                        <div class="min-w-[1200px] px-6">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
@@ -33,6 +49,9 @@
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Veiculo
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Motorista
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Status
@@ -70,6 +89,11 @@
                                         {{-- VEICULO --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             {{ $demanda->veiculo->modelo ?? 'N/A' }}
+                                        </td>
+
+                                        {{-- MOTORISTA --}}
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            {{ $demanda->motoboy->name ?? 'N/A' }}
                                         </td>
 
                                         {{-- STATUS --}}
@@ -135,7 +159,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-6 py-4 text-center dark:text-gray-400">
+                                        <td colspan="8" class="px-6 py-4 text-center dark:text-gray-400">
                                             Nenhuma demanda lançada.
                                         </td>
                                     </tr>
@@ -143,6 +167,10 @@
                             </tbody>
                             </table>
                         </div>
+                    </div>
+
+                    <div class="mt-4">
+                        {{ $demandas->links() }}
                     </div>
 
                 </div>
